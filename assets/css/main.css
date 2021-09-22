@@ -3318,4 +3318,22 @@ input, select, textarea {
 		width: 20%;
 		max-width: 400px;
 	  }
-	
+	  .company {
+		display: block;
+		margin-bottom: 20px;
+		font-size: 16px;
+		font-weight: normal;
+		color: #bfbfbf;
+	  }
+	  .logo_with_campany{
+		display: flex;
+		justify-content: flex-start;
+		gap: 5px;
+	  }
+	  .company_icon_class{
+		height: 30px;
+  		width: 30px;
+	  }
+	  .company_icon_class > img:hover{
+		transform: scale(2.5);
+	  }
