@@ -3309,4 +3309,13 @@ input, select, textarea {
 	  .software-skill-inline > i:hover ~ p {
 		color: #645beb;
 	  }
-	  
+	  .footer_image{
+		width: 10px;
+ 		height: auto;
+	  }
+	  .image_position {
+		position: relative;
+		width: 20%;
+		max-width: 400px;
+	  }
+	
