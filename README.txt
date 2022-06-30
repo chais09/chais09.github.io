@@ -1,4 +1,4 @@
-The portfolio for Chai Seng Loi. Hosted on GitHub page (chais09.github.io)
+The portfolio for Chai Seng Loi. Hosted on GitHub page (https://chais09.github.io/)
 
 Credits:
 	Support Structure:
