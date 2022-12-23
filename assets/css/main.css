@@ -3335,5 +3335,5 @@ input, select, textarea {
   		width: 30px;
 	  }
 	  .company_icon_class > img:hover{
-		transform: scale(2.5);
+		transform: scale(1.75);
 	  }
