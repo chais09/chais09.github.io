@@ -3337,3 +3337,7 @@ input, select, textarea {
 	  .company_icon_class > img:hover{
 		transform: scale(1.75);
 	  }
+	  .emphasized {
+		font-style: italic;
+		font-weight: bold;
+	  }
