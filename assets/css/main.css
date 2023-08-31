@@ -3341,3 +3341,6 @@ input, select, textarea {
 		font-style: italic;
 		font-weight: bold;
 	  }
+	.experience-ul>li {
+			margin-bottom: 2px;
+	}
