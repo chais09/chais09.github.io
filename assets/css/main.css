@@ -3306,8 +3306,16 @@ input, select, textarea {
 		color: #868e96;
 		font-size: 13px;
 	  }
-	  .software-skill-inline > i:hover ~ p {
+	  .software-skill-inline > i:hover ~ p,
+	  .software-skill-inline > img:hover ~ p {
 		color: #645beb;
+	  }
+	  .software-skill-inline > img {
+		filter: invert(0.6)
+	  }
+	  .software-skill-inline > img:hover {
+		filter: invert(0.4) sepia(1) hue-rotate(164deg);
+
 	  }
 	  .footer_image{
 		width: 10px;
