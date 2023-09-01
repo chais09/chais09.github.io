@@ -3498,3 +3498,7 @@ body.is-touch .poptrox-popup .closer {
 .experience-ul>li {
 	margin-bottom: 2px;
 }
+
+.experience-ul {
+	margin-bottom: 2em;
+}
