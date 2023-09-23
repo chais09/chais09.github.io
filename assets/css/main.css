@@ -3502,3 +3502,8 @@ body.is-touch .poptrox-popup .closer {
 .experience-ul {
 	margin-bottom: 2em;
 }
+
+.highschool-achievement > p {
+	margin-top: 0.7em;
+	margin-bottom: 0.1em;
+}
