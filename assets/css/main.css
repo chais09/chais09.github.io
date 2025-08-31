@@ -3484,7 +3484,13 @@ body.is-touch .poptrox-popup .closer {
 .company_icon_class {
 	height: 30px;
 	width: 30px;
+	margin-right: 10px;
 }
+
+.company_icon_class>img {
+	border-radius: 0.15em;
+}
+
 
 .company_icon_class>img:hover {
 	transform: scale(1.75);
