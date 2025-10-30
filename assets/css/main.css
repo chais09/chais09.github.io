@@ -1900,6 +1900,7 @@ header h6+p {
 
 header.major h2 {
 	font-size: 2em;
+	margin-bottom: 2px;
 }
 
 /* Form */
@@ -3509,7 +3510,7 @@ body.is-touch .poptrox-popup .closer {
 	margin-bottom: 2em;
 }
 
-.highschool-achievement > p {
+.highschool-achievement>p {
 	margin-top: 0.7em;
 	margin-bottom: 0.1em;
 }
