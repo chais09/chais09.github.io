@@ -586,6 +586,8 @@
 			<circle cx="32" cy="26" r="10" fill="#fff" />
 			<rect x="18" y="40" width="28" height="12" rx="6" fill="#fff" />
 		</svg>
+		<span id="chat-avatar-beta" aria-hidden="true">β</span>
+
 		<!-- <img class="image avatar" src="images/bot_profile.jpg" alt="" width="56" height="56"> -->
 	</div>
 
@@ -594,8 +596,15 @@
 
 	<div id="chat-panel" role="dialog" aria-modal="true" aria-label="Chat with me">
 		<div id="chat-header">
-			<div class="title">Ask about my experience</div>
+			<div class="title">Ask about my experience <span id="chat-beta-badge">BETA</span></div>
 			<button id="chat-close" aria-label="Close chat">✕</button>
+		</div>
+
+		<!-- Dismissible beta banner (optional) -->
+		<div id="chat-beta-banner" role="status" aria-live="polite">
+			⚠️ This résumé assistant is in <strong>beta</strong> and may be incomplete or inaccurate. Please verify
+			important details.
+			<button id="chat-beta-dismiss" aria-label="Dismiss beta notice">OK</button>
 		</div>
 		<div id="chat-body" aria-live="polite"></div>
 		<form id="chat-form" autocomplete="off">
