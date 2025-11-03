@@ -9,6 +9,7 @@
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
 		integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
 	<link rel="stylesheet" href="assets/css/main.css" />
+	<link rel="stylesheet" href="assets/css/chat.css">
 	<link rel="icon" href="images/profile.jpg" />
 
 </head>
@@ -21,6 +22,7 @@
 
 	gtag('config', 'G-XGVB18WG32');
 </script>
+<script src="assets/js/chat.js" defer></script>
 
 <body class="is-preload">
 
@@ -573,6 +575,34 @@
 				</div>
 			</div>
 		</section>
+	</div>
+
+	<!-- Chatbot -->
+	<!-- Chatbot widget -->
+	<div id="chat-avatar" aria-label="Open chat" role="button" tabindex="0">
+		<!-- cute head (SVG) -->
+		<svg viewBox="0 0 64 64" aria-hidden="true">
+			<circle cx="32" cy="32" r="30" fill="#111" />
+			<circle cx="32" cy="26" r="10" fill="#fff" />
+			<rect x="18" y="40" width="28" height="12" rx="6" fill="#fff" />
+		</svg>
+		<!-- <img class="image avatar" src="images/bot_profile.jpg" alt="" width="56" height="56"> -->
+	</div>
+
+	<!-- New: visible hint pill -->
+	<div id="chat-hint" role="status" aria-live="polite">Click to chat</div>
+
+	<div id="chat-panel" role="dialog" aria-modal="true" aria-label="Chat with me">
+		<div id="chat-header">
+			<div class="title">Ask about my experience</div>
+			<button id="chat-close" aria-label="Close chat">✕</button>
+		</div>
+		<div id="chat-body" aria-live="polite"></div>
+		<form id="chat-form" autocomplete="off">
+			<input id="chat-input" placeholder="Type your question…" maxlength="500" />
+			<button id="chat-send" type="submit">Send</button>
+		</form>
+		<div id="chat-foot">Powered by Gemini • Résumé RAG</div>
 	</div>
 
 	<!-- Footer -->
