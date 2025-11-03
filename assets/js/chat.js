@@ -10,12 +10,14 @@ const BODY = document.getElementById("chat-body");
 const FORM = document.getElementById("chat-form");
 const INPUT = document.getElementById("chat-input");
 const SEND = document.getElementById("chat-send");
+const BETA_BANNER = document.getElementById("chat-beta-banner");
+const BETA_DISMISS = document.getElementById("chat-beta-dismiss");
 
 
 // Suggested questions
 const DEFAULT_SUGGESTIONS = [
     "Tell me about your work at Intel",
-    "What technologies do you use?",
+    //"What technologies do you use?",
     "What kind of projects have you done?",
     "What is your educational background?",
     "Summarize your professional experience",
@@ -32,6 +34,17 @@ function triggerWiggle() {
         AV.classList.add("wiggle");
         setTimeout(() => AV.classList.remove("wiggle"), 1000); // remove after animation
     }
+}
+
+function maybeShowBetaBanner() {
+    const dismissed = sessionStorage.getItem("cbBetaDismissed") === "1";
+    if (!dismissed && BETA_BANNER) BETA_BANNER.style.display = "block";
+}
+if (BETA_DISMISS) {
+    BETA_DISMISS.addEventListener("click", () => {
+        sessionStorage.setItem("cbBetaDismissed", "1");
+        BETA_BANNER.style.display = "none";
+    });
 }
 
 // Start a timer when the avatar becomes visible
@@ -65,7 +78,7 @@ observer.observe(AV);
 
 
 function show(v) { PAN.style.display = v ? "block" : "none"; if (v) INPUT.focus(); }
-AV.addEventListener("click", () => { hideHint(); show(true); showSuggestions(); });
+AV.addEventListener("click", () => { hideHint(); show(true); maybeShowBetaBanner(); showSuggestions(); });
 CLOSE.addEventListener("click", () => show(false));
 AV.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); show(true); } });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && PAN.style.display === "block") show(false); });
