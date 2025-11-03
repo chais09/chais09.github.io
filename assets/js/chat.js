@@ -12,7 +12,7 @@ const INPUT = document.getElementById("chat-input");
 const SEND = document.getElementById("chat-send");
 const BETA_BANNER = document.getElementById("chat-beta-banner");
 const BETA_DISMISS = document.getElementById("chat-beta-dismiss");
-
+const HINT = document.getElementById("chat-hint");
 
 // Suggested questions
 const DEFAULT_SUGGESTIONS = [
@@ -22,19 +22,17 @@ const DEFAULT_SUGGESTIONS = [
     "Summarize your professional experience",
 ];
 
-const HINT = document.getElementById("chat-hint");
-function showHint() { HINT.classList.add("show"); }
-function hideHint() { HINT.classList.remove("show"); }
-// Wiggle the avatar if user ignores it for a few seconds
+// State
 let wiggleTimer;
+let idleTimer;
+let LAST_PROMPT = "";
+let LAST_BOT_DIV = null; // last bot bubble so we can replace it on Regenerate
 
-function triggerWiggle() {
-    if (AV.classList.contains("bounce-once")) {
-        AV.classList.add("wiggle");
-        setTimeout(() => AV.classList.remove("wiggle"), 1000); // remove after animation
-    }
-}
+// --- Hint (little “Click to chat”) ---
+function showHint() { HINT && HINT.classList.add("show"); }
+function hideHint() { HINT && HINT.classList.remove("show"); }
 
+// --- Beta banner (once per tab session) ---
 function maybeShowBetaBanner() {
     const dismissed = sessionStorage.getItem("cbBetaDismissed") === "1";
     if (!dismissed && BETA_BANNER) BETA_BANNER.style.display = "block";
@@ -46,46 +44,64 @@ if (BETA_DISMISS) {
     });
 }
 
-// Start a timer when the avatar becomes visible
+// --- Avatar bounce & wiggle to attract attention ---
+AV.setAttribute("title", "Click to chat"); // native tooltip
+function triggerWiggle() {
+    if (AV.classList.contains("bounce-once")) {
+        AV.classList.add("wiggle");
+        setTimeout(() => AV.classList.remove("wiggle"), 1000);
+    }
+}
 function startWiggleTimer() {
     clearTimeout(wiggleTimer);
-    wiggleTimer = setTimeout(triggerWiggle, 10000); // 10s after visible, do a wiggle
+    wiggleTimer = setTimeout(triggerWiggle, 10000);
 }
-
-// Reset wiggle timer if user hovers or interacts
-["mouseenter", "focus", "click"].forEach(ev => {
+["mouseenter", "focus", "click"].forEach((ev) => {
     AV.addEventListener(ev, () => clearTimeout(wiggleTimer));
     AV.addEventListener(ev, hideHint);
 });
-
-// Re-start timer if user moves mouse away
 AV.addEventListener("mouseleave", startWiggleTimer);
 
-// Integrate with IntersectionObserver (run only once)
-const observer = new IntersectionObserver((entries, obs) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            showHint();
-            AV.classList.add("bounce-once");
-            startWiggleTimer();
-            obs.disconnect(); // stop observing after first bounce
-        }
-    });
-}, { threshold: 0.5 });
-
+const observer = new IntersectionObserver(
+    (entries, obs) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                showHint();
+                AV.classList.add("bounce-once");
+                startWiggleTimer();
+                obs.disconnect();
+            }
+        });
+    },
+    { threshold: 0.5 }
+);
 observer.observe(AV);
 
-
-function show(v) { PAN.style.display = v ? "block" : "none"; if (v) INPUT.focus(); }
-AV.addEventListener("click", () => { hideHint(); show(true); maybeShowBetaBanner(); showSuggestions(); });
+// --- Open/close panel ---
+function show(v) {
+    PAN.style.display = v ? "block" : "none";
+    if (v) INPUT.focus();
+}
+AV.addEventListener("click", () => {
+    hideHint();
+    show(true);
+    maybeShowBetaBanner();
+    showSuggestions();
+});
 CLOSE.addEventListener("click", () => show(false));
-AV.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); show(true); } });
-document.addEventListener("keydown", (e) => { if (e.key === "Escape" && PAN.style.display === "block") show(false); });
+AV.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        show(true);
+    }
+});
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && PAN.style.display === "block") show(false);
+});
 
+// --- Suggestions (first open / idle) ---
 function showSuggestions() {
-    // If chat already has messages, don't show suggestions
     if (BODY.children.length > 0) return;
-
     const container = document.createElement("div");
     container.className = "msg bot";
     container.style.display = "flex";
@@ -98,7 +114,7 @@ function showSuggestions() {
         btn.className = "suggestion-btn";
         btn.type = "button";
         btn.onclick = () => {
-            container.remove(); // remove the buttons
+            container.remove();
             INPUT.value = q;
             FORM.dispatchEvent(new Event("submit"));
         };
@@ -108,8 +124,16 @@ function showSuggestions() {
     BODY.appendChild(container);
     BODY.scrollTop = BODY.scrollHeight;
 }
+function resetIdle() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+        if (BODY.children.length === 0 || BODY.children.length < 2) showSuggestions();
+    }, 30000);
+}
+document.addEventListener("click", resetIdle);
+document.addEventListener("keydown", resetIdle);
 
-// message helpers
+// --- Message helpers ---
 function addMsg(text, who = "bot") {
     const div = document.createElement("div");
     div.className = `msg ${who === "user" ? "user" : "bot"}`;
@@ -127,6 +151,47 @@ function addNote(text) {
     return div;
 }
 
+// --- Toolbar under bot replies (Regenerate + model tag) ---
+function attachBotToolbar(botDiv, data) {
+    const bar = document.createElement("div");
+    bar.className = "msg-toolbar";
+    bar.innerHTML = `
+    <button type="button" class="msg-tool" id="regen-btn">↻ Regenerate</button>
+    ${data?.model ? `<span class="msg-meta">Model: ${data.model}</span>` : ""}
+  `;
+    botDiv.appendChild(bar);
+
+    const regen = bar.querySelector("#regen-btn");
+    regen.addEventListener("click", async () => {
+        if (!LAST_PROMPT) return;
+
+        const thinking = document.createElement("div");
+        thinking.className = "thinking-inline";
+        thinking.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`;
+        bar.replaceWith(thinking);
+
+        INPUT.disabled = true;
+        SEND.disabled = true;
+        try {
+            const data2 = await askBackend(LAST_PROMPT);
+            // Replace last bot content with the new text
+            LAST_BOT_DIV.textContent = "";
+            LAST_BOT_DIV.className = "msg bot";
+            LAST_BOT_DIV.appendChild(document.createTextNode(data2.reply || "(no reply)"));
+            attachBotToolbar(LAST_BOT_DIV, data2);
+            BODY.scrollTop = BODY.scrollHeight;
+        } catch (err) {
+            LAST_BOT_DIV.appendChild(document.createElement("br"));
+            LAST_BOT_DIV.appendChild(document.createTextNode(` ⚠️ ${err.message}`));
+        } finally {
+            INPUT.disabled = false;
+            SEND.disabled = false;
+            INPUT.focus();
+        }
+    });
+}
+
+// --- Backend call ---
 async function askBackend(message) {
     const headers = { "Content-Type": "application/json" };
     if (ACCESS_KEY) headers["x-access-key"] = ACCESS_KEY;
@@ -134,52 +199,67 @@ async function askBackend(message) {
     const res = await fetch(`${BACKEND_BASE}/resume-chat`, {
         method: "POST",
         headers,
-        body: JSON.stringify({ message })
+        body: JSON.stringify({ message }),
     });
 
-    // try to parse either way
     let data = {};
-    try { data = await res.json(); } catch { }
+    try { data = await res.json(); } catch { /* ignore */ }
     if (!res.ok) {
         if (res.status === 429) throw new Error(data.error || "Rate limited / free-tier quota reached. Try later.");
         throw new Error(data.error || `Service error (${res.status})`);
     }
-    return data; // { reply, model, sources }
+    return data; // { reply, model, sources, beta? }
 }
 
-let idleTimer;
-function resetIdle() {
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => {
-        if (BODY.children.length === 0 || BODY.children.length < 2) showSuggestions();
-    }, 30000); // 30s idle
-}
-document.addEventListener("click", resetIdle);
-document.addEventListener("keydown", resetIdle);
-
+// --- Form submit ---
 FORM.addEventListener("submit", async (e) => {
     e.preventDefault();
     const msg = INPUT.value.trim();
+    LAST_PROMPT = msg;
+    LAST_BOT_DIV = null;
+
     if (!msg) return;
     INPUT.value = "";
     addMsg(msg, "user");
+
     const note = document.createElement("div");
     note.className = "msg note";
     note.innerHTML = `Thinking <div class="typing"><span></span><span></span><span></span></div>`;
     BODY.appendChild(note);
     BODY.scrollTop = BODY.scrollHeight;
 
-
-    INPUT.disabled = true; SEND.disabled = true;
+    INPUT.disabled = true;
+    SEND.disabled = true;
     try {
         const data = await askBackend(msg);
         note.remove();
-        addMsg(data.reply || "(no reply)", "bot");
-        if (data.model) addNote(`Model: ${data.model}`);
+        const botDiv = addMsg(data.reply || "(no reply)", "bot");
+        LAST_BOT_DIV = botDiv;
+        attachBotToolbar(botDiv, data);
     } catch (err) {
         note.remove();
-        addMsg(`⚠️ ${err.message}`, "bot");
+        const errDiv = addMsg(`⚠️ ${err.message}`, "bot");
+        // quick retry button on error
+        if (LAST_PROMPT) {
+            const retry = document.createElement("button");
+            retry.textContent = "Try again";
+            retry.className = "msg-tool";
+            retry.style.marginTop = "6px";
+            retry.onclick = () => { INPUT.value = LAST_PROMPT; FORM.dispatchEvent(new Event("submit")); };
+            errDiv.appendChild(document.createElement("br"));
+            errDiv.appendChild(retry);
+        }
     } finally {
-        INPUT.disabled = false; SEND.disabled = false; INPUT.focus();
+        INPUT.disabled = false;
+        SEND.disabled = false;
+        INPUT.focus();
+    }
+});
+
+// --- Keyboard shortcut: R to regenerate ---
+document.addEventListener("keydown", (e) => {
+    if (e.key.toLowerCase() === "r" && PAN.style.display === "block" && LAST_PROMPT && LAST_BOT_DIV) {
+        const btn = LAST_BOT_DIV.querySelector("#regen-btn");
+        btn && btn.click();
     }
 });
