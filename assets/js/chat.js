@@ -16,8 +16,7 @@ const BETA_DISMISS = document.getElementById("chat-beta-dismiss");
 
 // Suggested questions
 const DEFAULT_SUGGESTIONS = [
-    "Tell me about your work at Intel",
-    //"What technologies do you use?",
+    "What technologies do you use?",
     "What kind of projects have you done?",
     "What is your educational background?",
     "Summarize your professional experience",
