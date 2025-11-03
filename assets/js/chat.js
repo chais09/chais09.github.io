@@ -256,10 +256,10 @@ FORM.addEventListener("submit", async (e) => {
     }
 });
 
-// --- Keyboard shortcut: R to regenerate ---
-document.addEventListener("keydown", (e) => {
-    if (e.key.toLowerCase() === "r" && PAN.style.display === "block" && LAST_PROMPT && LAST_BOT_DIV) {
-        const btn = LAST_BOT_DIV.querySelector("#regen-btn");
-        btn && btn.click();
-    }
-});
+// // --- Keyboard shortcut: R to regenerate ---
+// document.addEventListener("keydown", (e) => {
+//     if (e.key.toLowerCase() === "r" && PAN.style.display === "block" && LAST_PROMPT && LAST_BOT_DIV) {
+//         const btn = LAST_BOT_DIV.querySelector("#regen-btn");
+//         btn && btn.click();
+//     }
+// });
