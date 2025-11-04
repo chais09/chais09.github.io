@@ -4,6 +4,7 @@ const ACCESS_KEY = "dd2abd17f906a7743d44a18844de3b08"; //
 
 // ===== elements =====
 const AV = document.getElementById("chat-avatar");
+const AI_CHAT_PROR = document.getElementById("ai-chat-project");
 const PAN = document.getElementById("chat-panel");
 const CLOSE = document.getElementById("chat-close");
 const BODY = document.getElementById("chat-body");
@@ -97,6 +98,11 @@ AV.addEventListener("keydown", (e) => {
 });
 document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && PAN.style.display === "block") show(false);
+});
+
+//-- When click AI_CHAT_PROR Project ----
+AI_CHAT_PROR.addEventListener("click", () => {
+    AV.click();
 });
 
 // --- Suggestions (first open / idle) ---
