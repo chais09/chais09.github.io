@@ -2,6 +2,9 @@
 const BACKEND_BASE = "https://eportfolio-gemini-api.onrender.com";
 const ACCESS_KEY = "dd2abd17f906a7743d44a18844de3b08"; // 
 
+// Treat coarse pointers (touch) as mobile/tablet
+const IS_MOBILE = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+
 // ===== elements =====
 const AV = document.getElementById("chat-avatar");
 const AI_CHAT_PROR = document.getElementById("ai-chat-project");
@@ -81,14 +84,18 @@ observer.observe(AV);
 // --- Open/close panel ---
 function show(v) {
     PAN.style.display = v ? "block" : "none";
+    if (v && !IS_MOBILE) {
+        INPUT.focus(); // desktop only
+    }
     if (v) INPUT.focus();
 }
 AV.addEventListener("click", () => {
     hideHint();
-    show(true);
-    maybeShowBetaBanner();
+    show(true);              // no focus on mobile
+    maybeShowBetaBanner?.();
     showSuggestions();
 });
+
 CLOSE.addEventListener("click", () => show(false));
 AV.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -192,7 +199,7 @@ function attachBotToolbar(botDiv, data) {
         } finally {
             INPUT.disabled = false;
             SEND.disabled = false;
-            INPUT.focus();
+            if (IS_MOBILE) INPUT.blur();
         }
     });
 }
