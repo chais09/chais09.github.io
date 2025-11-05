@@ -84,11 +84,25 @@ observer.observe(AV);
 // --- Open/close panel ---
 function show(v) {
     PAN.style.display = v ? "block" : "none";
+
+    // Desktop: focus input when opening
     if (v && !IS_MOBILE) {
-        INPUT.focus(); // desktop only
+        INPUT.focus();
     }
-    if (v) INPUT.focus();
+
+    // Mobile: prevent keyboard on open
+    if (v && IS_MOBILE) {
+        // Optional “no-keyboard on open” trick:
+        INPUT.setAttribute("readonly", "readonly");
+        const enableTyping = () => {
+            INPUT.removeAttribute("readonly");
+            INPUT.focus();              // user explicitly tapped, OK to open keyboard
+        };
+        // Enable typing on first tap inside the input
+        INPUT.addEventListener("touchstart", enableTyping, { once: true });
+    }
 }
+
 AV.addEventListener("click", () => {
     hideHint();
     show(true);              // no focus on mobile
@@ -265,7 +279,11 @@ FORM.addEventListener("submit", async (e) => {
     } finally {
         INPUT.disabled = false;
         SEND.disabled = false;
-        INPUT.focus();
+        if (IS_MOBILE) {
+            INPUT.blur();        // keep keyboard closed
+        } else {
+            INPUT.focus();       // desktop convenience
+        }
     }
 });
 
