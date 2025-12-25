@@ -265,7 +265,7 @@ FORM.addEventListener("submit", async (e) => {
         attachBotToolbar(botDiv, data);
     } catch (err) {
         note.remove();
-        const errDiv = addMsg(`⚠️ ${err.message}`, "bot");
+        const errDiv = addMsg(`⚠️ Oops! The chatbot backend hit the free-tier limit for this month. It’ll be back soon 🙂`, "bot");
         // quick retry button on error
         if (LAST_PROMPT) {
             const retry = document.createElement("button");
