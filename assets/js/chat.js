@@ -1,5 +1,5 @@
 // === SET THIS to your Render backend base URL ===
-const BACKEND_BASE = "https://eportfolio-gemini-api.onrender.com";
+const BACKEND_BASE = "https://eportfolio-gemini-api-c8fo.onrender.com" || "https://eportfolio-gemini-api.onrender.com";
 const ACCESS_KEY = "dd2abd17f906a7743d44a18844de3b08"; // 
 
 // Treat coarse pointers (touch) as mobile/tablet
