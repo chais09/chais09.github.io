@@ -170,8 +170,8 @@
     color: var(--text);
     position: fixed;
     right: 18px;
-    bottom: 86px;
-    width: 360px;
+    bottom: 5px;
+    width: 450px;
     max-width: 92vw;
     background: var(--bg);
     border: 1px solid var(--border);
